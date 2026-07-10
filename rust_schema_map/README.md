@@ -1,19 +1,27 @@
-DB-Mapping Fragment Accumulator:  Rust
+#### Rust DB-Schema Mapping Tool
 Geoffrey Gordon Ashbrook 2026.07.09-10th
 
-(note: See full assignment instructions in doc.)
+
+# Overall Project:
+- Make a tool that takes in two DB-schema documents, a SQL-schema and a MongoDB-schema, and outputs a schema-map of the fields from SQL to Mongo.
+
+- See full assignment instructions in doc.
+
+- A .py LLM version (with dubious practical applications) exists, but can a
+production Rust version be made? Let's explore and compare the two approaches.
+
+- To run code: cargo run (https://rustup.rs/ is the official Rust installer)
 
 
-# Overall Plan:
-- Use Rust
-- input two db~schema files
-- use rules-based NLP to map fields
-- Produce a json file of the map
+## Overall Approach Summary:
+- Language: Rust (No third party libraries)
+- Input: Two db~schema files
+- NLP Paradigm: Use rules-based NLP to map fields
+- Output: Produce a json file of the map
 
 
-A .py LLM version (with dubious practical applications) exists, but can a production Rust version be made? Let's explore.
 
-### Rust & Levinshtein Distance et al
+## Rust NLP:
 This task is a schema-matching problem, which is much more structure-intensive than many very-unstructured-input uses where a generative LLM may be needed.  Schema-matching has decades of history and literature for GOFAI/statistical techniques (Levenshtein-distance, token-set similarity, structural/type compatibility, abbreviation dictionaries, and many more) that are more production-friendly than LLMs of the 2020s.
 
 (E.g. see https://datamade.us/blog/schema-matching/ )
@@ -23,7 +31,7 @@ A Rust implementation, namely a vanilla-rust (standard-library-only) approach, m
 - slimmer: efficiency
 - faster
 - safer
-- more robust atomics, concurrency, parallelization
+- more robust atomics, concurrency, Parallelization
 - better error tracking and auditing
 - explainability
 - predictability
@@ -35,7 +43,6 @@ A Rust implementation, namely a vanilla-rust (standard-library-only) approach, m
 - more meaningful confidence-score
 
 Note: It took significantly longer to design and make the Rube-Goldberg LLM-fake solution-in-search-of-a-problem toy, compared with a Rust-NLP-GOFAI system that does have the potential to be useful in production and general practical use.
-
 Note: Code built with support from Anthropic Claude, using specific mode, case-handling, and standards rules.
 
 # NLP Approach Summary: Old Fashioned NLP Approach Overview
@@ -137,3 +144,87 @@ This program could also easily be adapted into being a module to add to other sy
 
 ## Matching and Joint-Derived Fields:
 Separately, a few new-schema fields (like the full department or location details attached to each employee) are deliberately left unmatched at the employee level — not because the matcher failed, but because those data do not come from the employee table at all;. Fields derived from joins between tables are, by standard practice, not included in this level of field-mapping but in a process call "normalization" (yet another colliding term in STEM, naming things is hard (apparently)) those derived fields handled later by combining data from the department and location tables during the actual migration.
+
+# Appendix 1: Schema Mapping, Production-Data-Science, & Production Software
+
+## Connected Areas:
+- needs and goals evaluation https://github.com/lineality/needs_goals_assessment_disambiguation
+- project areas https://github.com/lineality/project_areas_for_project_and_product_management
+- coordinated decisions https://github.com/lineality/Networked_Voting_and_Decisions_Including_One_Time_Pads
+- project-definition: definition behavior studies https://github.com/lineality/definition_behavior_studies
+
+
+## Production-Design Topics:
+How and where production data science projects need to be managed carefully.
+
+1. local, batch, at-scale, cloud,
+
+2. Output structuring and details of deployment
+- self-hosted,
+- .gguf,
+- hidden api-service
+- specific api-services
+
+3. Classic NLP, GOFAI, "Deterministic" approach,
+
+4. Crawling vs. large-chunk
+
+5. Parallelization
+- also for debugging
+
+6. Language Choice
+- third party dependencies
+
+7. Third Party dependencies
+- a serious and escalating liability
+- See the 'where can be used' issue for pydantic + output_format structuring.
+
+8. Full automation vs. semi-automating tool
+- the fact that this dummy-project generates an unstructured text-field is suspicious, suggesting that this a solution in search of a problem, automatically and verbosely generating possibly useless and illogical documentation-word salad that some human being will manually need to inspect, as opposed to a tool designed to be used by a person for something more specific.
+
+Small-Clear-Task-Doer: Good, Best
+Big-automated-task-doer: Dubious, but can be good.
+Task-Helper: Good, flexible.
+Automated-Unchecked-Documentation-Generator: Very Bad.
+
+9. Definition, Testing, Evaluation, Benchmarking, Auditing:
+Is something designed so that what it is doing is clearly defined in such as way that it can, effectively, be
+- unit-tested
+- workflow-tested
+- performance benchmarked (as in live month-to-month performance with potential changes to the system or to inputs)
+- given a meaningful evaluation test (not a mismatched test, or a dubious or overly-indirect test)
+
+10. Error logging and error/case handling
+- also gets into language choice
+
+11. Atomics, Parallelism and Concurrency
+- can it be optimized, does need to be
+- debugging
+- maintainability
+- the project-scope and time required
+- Language Rust vs. Python
+
+12. scalability
+
+13. maintainability
+
+14. deployability
+- on edge
+- in a serverless endpoint
+- consistently fast enough to be an endpoint under 30-sec. (backend-frontend latency, the need for 'step functions' etc.)
+
+15. Design Maturity
+Is the whole project/product design mature or is this a theoretical 'solution in search of a problem,' with hopes of a deployment and affordability pathway, and with a dream of maintainability?
+
+16. A case for a "Small" vs. "Large" Foundation model
+
+17. Input data type ambiguity:
+For document processing in real life this can be the most critical issue, yet it can be overlooked all the way until eventual project-collapse.
+
+18. "Platform" and Hardware: Where will this be used and deployed?
+
+19. Dependencies, Black-Box Services, & 'primative' tools
+- It is probably broadly misunderstood that models are not the same as service-bundles:
+-- input format and parts
+-- output format
+-- the loss of parameter setting
